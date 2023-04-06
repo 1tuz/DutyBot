@@ -3,31 +3,31 @@ from dotenv import load_dotenv
 import telegram
 import asyncio
 
-# загружаем переменные из файла .env
 load_dotenv()
+
 bot_token = os.getenv('TOKEN')
-group_chat_id = os.getenv('GROUP_ID')
-usernames = os.getenv('USERS').split()
+group_id = int(os.getenv('GROUP_ID'))
+usernames = [username.replace('"', '').replace("'", '').replace('[', '').replace(']', '').replace(',', '').strip() for username in os.getenv('USERS').split(',')]
+starting_user_index = int(os.getenv('START_INDEX'))
 
-# создаем объект бота
 bot = telegram.Bot(token=bot_token)
-duty_file_path = 'duty.txt'
-
-usernames = [username.replace('"', '').replace("'", '').replace('[', '').replace(']', '').replace(',', '') for username in usernames]
 
 async def main():
-    with open(duty_file_path, 'r') as duty_file:
-        current_duty_index = int(duty_file.read().strip()) if os.path.exists(duty_file_path) else -1
+    global starting_user_index
 
-    next_duty_index = (current_duty_index + 1) % len(usernames)
+    next_duty_index = (starting_user_index + 1) % len(usernames)
     next_duty = usernames[next_duty_index]
 
     message_text = f'Сегодня дежурный: {next_duty}'
-    await bot.send_message(chat_id=group_chat_id, text=message_text)
+    await bot.send_message(chat_id=group_id, text=message_text)
 
-    with open(duty_file_path, 'w') as duty_file:
-        duty_file.write(str(next_duty_index))
-
+    starting_user_index = next_duty_index
+    os.environ['START_INDEX'] = str(starting_user_index)
+    with open('.env', 'w') as f:
+        f.write(f"TOKEN={bot_token}\n")
+        f.write(f"USERS={','.join(usernames)}\n")
+        f.write(f"GROUP_ID={group_id}\n")
+        f.write(f"START_INDEX={starting_user_index}\n")
 
 if __name__ == '__main__':
     asyncio.run(main())
