@@ -36,7 +36,7 @@ async def main():  # Используем асинхронность в функ
     next_duty_index = (starting_user_index + 1) % len(usernames)
     next_duty = usernames[next_duty_index]
 
-    message_text = f'Сегодня дежурный: {next_duty}'
+    message_text = f'Всем доброго времени суток!\nСегодня дежурный: {next_duty}'
     await bot.send_message(chat_id=group_id, text=message_text)  # Добавляем await
 
     starting_user_index = next_duty_index
