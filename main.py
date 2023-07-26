@@ -4,9 +4,10 @@ from dotenv import load_dotenv
 import logging
 from datetime import datetime, timedelta
 import time
+import datetime
 
 load_dotenv()
-bot_token = os.getenv('TOKEN')
+bot_token = os.getenv('TOKEN')  
 group_id = int(os.getenv('GROUP_ID'))
 usernames = [username.replace('"', '').replace("'", '').replace('[', '').replace(']', '').replace(',', '').strip() for
              username in os.getenv('USERS').split(',')]
@@ -16,6 +17,10 @@ starting_user_index = 0
 logging.basicConfig(filename='duty_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Log start time
+start_time = datetime.datetime.now()
+print(f"Bot started at {start_time}")
+logging.info(f"Bot started at {start_time}")
 
 def save_indexes(start_index, counter):
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -23,8 +28,7 @@ def save_indexes(start_index, counter):
     with open(file_path, 'w') as f:
         f.write(f"START_INDEX={start_index}\n")
         f.write(f"COUNTER={counter}")
-
-
+        
 def load_indexes():
     current_directory = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_directory, 'indexes.txt')
@@ -45,7 +49,6 @@ def load_indexes():
             counter = int(value)
 
     return start_index, counter
-
 
 def send_duty_message():
     starting_user_index, counter = load_indexes()
@@ -81,20 +84,24 @@ def send_duty_message():
 
 def run_duty_bot():
     while True:
-        # Get the current time
+        # Current time
         now = datetime.now()
 
-        # Тест тайм-аутов
+        # Test timeouts
         if now.hour in [7, 8, 9, 10, 16, 22, 23]:
             send_duty_message()
 
         # Sleep for 1 hour before checking again
         time.sleep(3600)
 
-
 if __name__ == '__main__':
-    # Run the duty bot indefinitely
+
     try:
         run_duty_bot()
     except KeyboardInterrupt:
         pass
+        
+# Log end time
+end_time = datetime.datetime.now()
+print(f"Bot finished at {end_time}")
+logging.info(f"Bot finished at {end_time}")
